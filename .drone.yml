@@ -3,8 +3,19 @@ type: docker
 name: default
 
 steps:
-  - name: test
-    image: alpine:3.8
+  - name: ping
+    image: redis
     commands:
-      - echo hello
-      - echo world
+      - redis-cli -h cache ping
+
+services:
+  - name: cache
+    image: redis
+
+trigger:
+  branch:
+    - master
+  event:
+    include:
+      - push
+      - pull_request

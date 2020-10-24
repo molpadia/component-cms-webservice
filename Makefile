@@ -39,7 +39,7 @@ ssh-mysql:
 	@docker-compose $(project) exec mysql bash
 
 ssh-redis:
-	@docker-compose $(project) exec redis bash
+	@docker-compose $(project) exec redis sh
 
 exec:
 	@docker-compose $(project) exec $(optionT) app $$cmd

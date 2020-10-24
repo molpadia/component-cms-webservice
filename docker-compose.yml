@@ -1,41 +1,88 @@
 version: '3'
 
 services:
-  drone-server:
-    image: drone/drone:latest
+  app: &laravel-template
+    image: component-cms-webservice:latest
+    build:
+      context: .
+      args:
+        - BUILD_ARGUMENT_ENV=dev
+        - BUILD_ARGUMENT_DEBUG_ENABLED=false
+      dockerfile: ./Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME}-app
+    expose:
+      - 8000
     ports:
-      - 8080:80
-      - 443:443
-    restart: always
+      - 8000:8000
     volumes:
-      - ./storage/drone:/data
-    environment:
-      - DRONE_GITHUB_SERVER=https://github.com
-      - DRONE_GITHUB_CLIENT_ID=${DRONE_GITHUB_CLIENT_ID}
-      - DRONE_GITHUB_CLIENT_SECRET=${DRONE_GITHUB_CLIENT_SECRET}
-      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
-      - DRONE_SERVER_HOST=${DRONE_SERVER_HOST}
-      - DRONE_SERVER_PROTO=${DRONE_SERVER_PROTO}
-      - DRONE_TLS_AUTOCERT=false
-      - DRONE_AGENTS_ENABLED=true
-      - DRONE_DEBUG_=true
-      - DRONE_LOGS_PRETTY=true
-      - DRONE_LOGS_COLOR=true
-      - DRONE_LOGS_TRACE=true
-
-  drone-runner:
-    image: drone/drone-runner-docker:latest
-    restart: always
-    ports:
-      - 3000:3000
+      - .:/var/www/html
     depends_on:
-      - drone-server
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - mysql
+      - redis
+    links:
+      - mysql
+      - redis
+
+  mysql:
+    image: mysql:8.0
+    container_name: ${COMPOSE_PROJECT_NAME}-mysql
+    command: --default-authentication-plugin=mysql_native_password
     environment:
-      - DRONE_RPC_HOST=${DRONE_RPC_HOST}
-      - DRONE_RPC_PROTO=${DRONE_RPC_PROTO}
-      - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
-      - DRONE_RUNNER_CAPACITY=3
-      - DRONE_LOGS_TRACE=true
-      - DRONE_RUNNER_NAME=dev
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=cms
+    ports:
+      - 33061:3306
+    volumes:
+      - ./storage/mysql-data:/var/lib/mysql
+      - ./docker/dev/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
+  redis:
+    image: redis:alpine
+    container_name: ${COMPOSE_PROJECT_NAME}-redis
+    command: redis-server --requirepass sOmE_sEcUrE_pAsS
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    ports:
+      - 6379:6379
+    volumes:
+      - ./storage/redis-data:/var/lib/redis
+      - ./docker/dev/redis.conf:/usr/local/etc/redis/redis.conf
+
+  # drone-server:
+  #   image: drone/drone:latest
+  #   ports:
+  #     - 8080:80
+  #     - 443:443
+  #   restart: always
+  #   volumes:
+  #     - ./storage/drone:/data
+  #   environment:
+  #     - DRONE_GITHUB_SERVER=https://github.com
+  #     - DRONE_GITHUB_CLIENT_ID=${DRONE_GITHUB_CLIENT_ID}
+  #     - DRONE_GITHUB_CLIENT_SECRET=${DRONE_GITHUB_CLIENT_SECRET}
+  #     - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
+  #     - DRONE_SERVER_HOST=${DRONE_SERVER_HOST}
+  #     - DRONE_SERVER_PROTO=${DRONE_SERVER_PROTO}
+  #     - DRONE_TLS_AUTOCERT=false
+  #     - DRONE_AGENTS_ENABLED=true
+  #     - DRONE_DEBUG_=true
+  #     - DRONE_LOGS_PRETTY=true
+  #     - DRONE_LOGS_COLOR=true
+  #     - DRONE_LOGS_TRACE=true
+
+  # drone-runner:
+  #   image: drone/drone-runner-docker:latest
+  #   restart: always
+  #   ports:
+  #     - 3000:3000
+  #   depends_on:
+  #     - drone-server
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   environment:
+  #     - DRONE_RPC_HOST=${DRONE_RPC_HOST}
+  #     - DRONE_RPC_PROTO=${DRONE_RPC_PROTO}
+  #     - DRONE_RPC_SECRET=${DRONE_RPC_SECRET}
+  #     - DRONE_RUNNER_CAPACITY=3
+  #     - DRONE_LOGS_TRACE=true
+  #     - DRONE_RUNNER_NAME=dev

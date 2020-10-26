@@ -36,6 +36,5 @@ trigger:
   branch:
     - master
   event:
-    include:
-      - push
-      - pull_request
+    - push
+    - pull_request

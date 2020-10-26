@@ -19,16 +19,8 @@ steps:
       - php --version
       - composer validate --no-check-all --strict
       - composer install --no-progress --no-suggest --optimize-autoloader
-    volumes:
-      - name: composer-cache
-        path: /tmp/composer-cache
 
   - name: phpunit
     image: joomlaprojects/docker-images:php7.3
     commands:
       - vendor/bin/phpunit
-
-volumes:
-  - name: composer-cache
-    host:
-      path: /tmp/composer-cache

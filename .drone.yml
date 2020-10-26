@@ -1,9 +1,6 @@
+---
 kind: pipeline
-name: Codequality
-
-platform:
-  os: linux
-  arch: amd64
+name: codequality
 
 clone:
   git:
@@ -11,9 +8,13 @@ clone:
     depth: 50
     tags: true
 
+platform:
+  os: linux
+  arch: amd64
+
 steps:
   - name: composer
-    image: joomlaprojects/docker-images:php7.3
+    image: joomlaprojects/docker-tools:develop
     commands:
       - php --version
       - composer validate --no-check-all --strict
@@ -23,7 +24,7 @@ steps:
         path: /tmp/composer-cache
 
   - name: phpunit
-    iamge: joomlaprojects/docker-images:php7.3
+    image: joomlaprojects/docker-images:php7.3
     commands:
       - vendor/bin/phpunit
 
@@ -31,10 +32,3 @@ volumes:
   - name: composer-cache
     host:
       path: /tmp/composer-cache
-
-trigger:
-  branch:
-    - master
-  event:
-    - push
-    - pull_request

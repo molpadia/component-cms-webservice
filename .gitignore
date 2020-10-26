@@ -11,11 +11,12 @@
 Homestead.yaml
 Homestead.json
 .env
-_ide_helper.php
 .phpstorm.meta.php
+.phpunit.result.cache
+_ide_helper.php
 _ide_helper_models.php
 reports/*
 !reports/.gitkeep
+composer.lock
 npm-debug.log
 yarn-error.log
-.phpunit.result.cache

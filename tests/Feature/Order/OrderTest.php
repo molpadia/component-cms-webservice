@@ -2,10 +2,6 @@
 
 namespace Tests\Order\Feature;
 
-use App\Models\Order;
-use App\Models\OrderDetail;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class OrderTest extends TestCase

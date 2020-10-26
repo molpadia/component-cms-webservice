@@ -1,16 +1,32 @@
 kind: pipeline
 type: docker
-name: default
+name: Codequality
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  git:
+    image: plugins/git:1
+    depth: 50
+    tags: true
 
 steps:
-  - name: ping
-    image: redis
+  - name: composer
+    image: joomlaprojects/docker-images:php7.3
     commands:
-      - redis-cli -h cache ping
+      - php --version
+      - composer validate --no-check-all --strict
+      - composer install --no-progress --no-suggest --optimize-autoloader
+    volumes:
+      - name: composer-cache
+        path: /tmp/composer-cache
 
-services:
-  - name: cache
-    image: redis
+volumes:
+  - name: composer-cache
+    host:
+      path: /tmp/composer-cache
 
 trigger:
   branch:
@@ -18,4 +34,3 @@ trigger:
   event:
     include:
       - push
-      - pull_request

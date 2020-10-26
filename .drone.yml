@@ -1,5 +1,4 @@
 kind: pipeline
-type: docker
 name: Codequality
 
 platform:
@@ -23,6 +22,11 @@ steps:
       - name: composer-cache
         path: /tmp/composer-cache
 
+  - name: phpunit
+    iamge: joomlaprojects/docker-images:php7.3
+    commands:
+      - vendor/bin/phpunit
+
 volumes:
   - name: composer-cache
     host:
@@ -34,3 +38,4 @@ trigger:
   event:
     include:
       - push
+      - pull_request

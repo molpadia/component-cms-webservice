@@ -5,7 +5,9 @@
 /public/hot
 /public/storage
 /storage/*.key
+/storage/drone/
 /storage/mysql-data/
+/storage/redis-data/
 /vendor
 /tools/**/vendor
 Homestead.yaml

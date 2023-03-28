@@ -13,22 +13,24 @@ platform:
   arch: amd64
 
 steps:
-  - name: composer
-    image: joomlaprojects/docker-tools:develop
+  - name: pre-build
+    image: joomlaprojects/docker-images:php7.3
     commands:
+      - cp .env.dev .env
       - php --version
-      - composer validate --no-check-all --strict
-      - composer install --no-progress --no-suggest --optimize-autoloader
-    volumes:
-      - name: composer-cache
-        path: /tmp/composer-cache
+      - composer install --no-progress --prefer-dist
 
   - name: phpunit
     image: joomlaprojects/docker-images:php7.3
     commands:
+      - php artisan key:generate
+      - php artisan migrate --force
       - vendor/bin/phpunit
 
-volumes:
-  - name: composer-cache
-    host:
-      path: /tmp/composer-cache
+services:
+  - name: mysql
+    image: mysql:5
+    environment:
+      # MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: cms
+      MYSQL_ROOT_PASSWORD: secret
